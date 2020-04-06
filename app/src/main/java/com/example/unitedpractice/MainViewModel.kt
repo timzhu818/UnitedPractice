@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.example.unitedpractice.retrofit.Article
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
 import java.lang.Exception
 
 
@@ -18,7 +19,7 @@ class MainViewModel : ViewModel() {
 
     private lateinit var job: Job
 
-    var refreshing: Boolean = true
+    var refreshing: Boolean = false
 
     val articleList: LiveData<List<Article?>?> = _articleList
     val errorMessage: LiveData<String> = _errorMessage
@@ -31,17 +32,20 @@ class MainViewModel : ViewModel() {
         job = CoroutineScope(IO).launch {
             try {
                 val response = repository.getNews()
-                when (response.isSuccessful) {
-                    true -> _articleList.value = response.body()?.articles
-                    else -> response.errorBody()?.let { _errorMessage.value = it.toString() }
+                withContext(Main) {
+                    when (response.isSuccessful) {
+                        true -> _articleList.value = response.body()?.articles
+                        else -> response.errorBody()?.let { _errorMessage.value = it.toString() }
+                    }
                 }
             } catch (exception: Exception) {
                 _errorMessage.postValue(exception.toString())
             }
-        }
+        }.also { it.invokeOnCompletion { refreshing = false } }
     }
 
     override fun onCleared() {
+        job.cancel()
         super.onCleared()
     }
 }

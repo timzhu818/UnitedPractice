@@ -15,7 +15,9 @@ import com.example.unitedpractice.retrofit.Article
 class MainActivity : AppCompatActivity() {
 
     private val articles: MutableList<Article?>? = mutableListOf()
-    private lateinit var articlesAdapter: ArticlesAdapter
+    private val articlesAdapter by lazy {
+        ArticlesAdapter(articles, this@MainActivity)
+    }
 
     private val viewModel by lazy {
         ViewModelProvider(this).get(MainViewModel::class.java)
@@ -42,7 +44,8 @@ class MainActivity : AppCompatActivity() {
     private fun setUpListView(it: List<Article?>?) {
         it?.let { articleResponse ->
             articles?.apply {
-                //TODO
+                clear()
+                addAll(articleResponse)
             }
             articlesAdapter.notifyDataSetChanged()
         }

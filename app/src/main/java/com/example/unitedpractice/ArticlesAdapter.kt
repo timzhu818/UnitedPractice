@@ -22,7 +22,7 @@ class ArticlesAdapter(private val articles: MutableList<Article?>?, private val 
     }
 
     override fun onBindViewHolder(holder: ArticleHolder, position: Int) {
-        //TODO
+        holder.bind(articles?.get(position),context)
     }
 
     class ArticleHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
